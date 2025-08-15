@@ -1,6 +1,6 @@
 import type { Task } from "../../types/task";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL ;
 const WS_URL =
   API_URL.replace(/^http/, "ws") + "/socket.io/?EIO=4&transport=websocket";
 

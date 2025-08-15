@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Task } from "../types/task";
 import Cookies from "js-cookie";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL ;
 
 // יצירת מופע axios מותאם אישית
 const api = axios.create({
