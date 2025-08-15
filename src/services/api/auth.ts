@@ -1,3 +1,4 @@
+// services/auth.ts
 import api from "./config";
 import Cookies from "js-cookie";
 
@@ -10,6 +11,12 @@ type RegisterData = {
   username: string;
   email: string;
   password: string;
+};
+
+type UserData = {
+  username: string;
+  email: string;
+  id: string;
 };
 
 export const login = async (credentials: LoginCredentials): Promise<void> => {
@@ -36,5 +43,19 @@ export const verifyToken = async (): Promise<boolean> => {
     return true;
   } catch {
     return false;
+  }
+};
+
+export const getUser = async (): Promise<UserData | null> => {
+  try {
+    // נבדוק קודם אם יש טוקן לפני שניגש לשרת
+    const token = Cookies.get("token");
+    if (!token) return null;
+
+    const { data } = await api.get("/auth/me");
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch user data:", error);
+    return null;
   }
 };

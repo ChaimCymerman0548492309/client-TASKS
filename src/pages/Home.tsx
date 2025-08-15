@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
-import { Box, Button } from "@mui/material";
+import { Box, Button,  } from "@mui/material";
+// import Cookies from "js-cookie";
 import { logout, fetchTasks } from "../services/api";
 import { connectWebSocket } from "../services/socket";
 import { TaskList } from "../components/TaskList";
@@ -15,7 +16,9 @@ export const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+
+    const API_URL = import.meta.env.VITE_API_URL ;
 
     const loadInitialTasks = async () => {
       try {
@@ -61,16 +64,21 @@ export const Home = () => {
     }
   };
 
+ 
+
   if (loading) {
     return <Box sx={{ p: 2 }}>Loading tasks...</Box>;
   }
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Logout
-        </Button>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Button variant="contained" color="secondary" onClick={handleLogout}>
+              Logout
+            </Button>
+          </Box>
+     
       </Box>
 
       <AddTask />

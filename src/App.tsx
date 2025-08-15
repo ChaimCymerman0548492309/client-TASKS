@@ -5,7 +5,7 @@ import { themeAtom } from "./contexts/theme";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
-
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function AppWrapper() {
   const [theme] = useAtom(themeAtom);
@@ -22,7 +22,14 @@ function AppWrapper() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
