@@ -63,6 +63,7 @@ export const login = async (credentials: {
   password: string;
 }): Promise<void> => {
   const { data } = await api.post("/auth/login", credentials);
+  console.log("🚀 ~ login ~ data:", data)
   Cookies.set("token", data.token, { secure: true, sameSite: "strict" });
 };
 
