@@ -2,37 +2,18 @@ import axios from "axios";
 import type { Task } from "../types/task";
 import Cookies from "js-cookie";
 
-const API_URL = import.meta.env.VITE_API_URL ;
+const API_URL = import.meta.env.VITE_API_URL;
 
-// יצירת מופע axios מותאם אישית
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: true, // שולח cookies לשרת
 });
 
-// אינטרספטור להוספת הטוקן לכל בקשה
-api.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// אין צורך ב-interceptor ל-Authorization בכלל
 
-// אינטרספטור לטיפול בשגיאות
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // ניתוב מחדש לדף התחברות אם הטוקן לא תקין
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
-);
-
-
-
+// ============================
+// Tasks
+// ============================
 export const fetchTasks = async (): Promise<Task[]> => {
   const { data } = await api.get("/tasks");
   return data;
@@ -57,14 +38,23 @@ export const deleteTask = async (id: string): Promise<void> => {
   await api.delete(`/tasks/${id}`);
 };
 
-// פונקציות אימות
+// ============================
+// Authentication
+// ============================
 export const login = async (credentials: {
   email: string;
   password: string;
 }): Promise<void> => {
   const { data } = await api.post("/auth/login", credentials);
-  console.log("🚀 ~ login ~ data:", data)
-  Cookies.set("token", data.token, { secure: true, sameSite: "strict" });
+  console.log("🚀 Login response:", data);
+
+  // שומרים רק userInfo לקריאה בצד הקליינט (לא את הטוקן!)
+  if (data.userInfo) {
+    Cookies.set("userInfo", JSON.stringify(data.userInfo), {
+      secure: true,
+      sameSite: "strict",
+    });
+  }
 };
 
 export const register = async (userData: {
@@ -77,5 +67,5 @@ export const register = async (userData: {
 
 export const logout = async (): Promise<void> => {
   await api.post("/auth/logout");
-  Cookies.remove("token");
+  Cookies.remove("userInfo");
 };

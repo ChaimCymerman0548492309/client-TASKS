@@ -1,7 +1,7 @@
+import io, { Socket } from "socket.io-client";
 import type { Task } from "../types/task";
-import io from "socket.io-client";
 
-let socket: SocketIOClient.Socket | null = null;
+let socket: Socket | null = null;
 
 export const connectWebSocket = (
   url: string,
@@ -15,31 +15,22 @@ export const connectWebSocket = (
     path: "/api/socket.io",
     transports: ["websocket"],
     autoConnect: true,
+    withCredentials: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
   });
 
-  socket.on("connect", () => {
-    console.log("Socket.IO connected");
-  });
+  socket.on("connect", () => console.log("Socket.IO connected"));
+  socket.on("disconnect", () => console.log("Socket.IO disconnected"));
+  socket.on("connect_error", (err) => console.error("Socket.IO error:", err));
 
   socket.on("task_created", (task: Task) => onUpdate(task));
   socket.on("task_updated", (task: Task) => onUpdate(task));
   socket.on("task_deleted", ({ _id }: { _id: string }) => onDelete(_id));
 
-  socket.on("disconnect", () => {
-    console.log("Socket.IO disconnected");
-  });
-
-  socket.on("connect_error", (err: { message: string }) => {
-    console.error("Socket.IO connection error:", err.message);
-  });
-
   return () => {
-    if (socket) {
-      socket.disconnect();
-      socket = null;
-    }
+    socket?.disconnect();
+    socket = null;
   };
 };
 
