@@ -27,19 +27,25 @@ export const Register = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setError("");
-      await register({
-        username: data.username,
-        email: data.email,
-        password: data.password,
-      });
-      navigate("/");
-    } catch {
-      setError("Registration failed. Please try again.");
-    }
-  };
+const onSubmit = async (data: FormData) => {
+  try {
+    setError("");
+    await register(data);
+    navigate("/login"); // Redirect to login after successful registration
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    const errorMap: Record<string, string> = {
+      "username already exists": "Username is already taken",
+      "email already exists": "Email is already registered",
+      ValidationError: "Invalid registration data",
+    };
+    setError(
+      errorMap[err.response?.data?.error] ||
+        err.message ||
+        "Registration failed"
+    );
+  }
+};
 
   return (
     <Container

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
-import { Box, Button,  } from "@mui/material";
-// import Cookies from "js-cookie";
+import { Box, Button, Avatar, Chip } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import Cookies from "js-cookie";
 import { logout, fetchTasks } from "../services/api";
 import { connectWebSocket } from "../services/socket";
 import { TaskList } from "../components/TaskList";
@@ -13,13 +14,10 @@ import { tasksAtom } from "../contexts/tasks";
 export const Home = () => {
   const [tasks, setTasks] = useAtom(tasksAtom);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-
-
-    const API_URL = import.meta.env.VITE_API_URL ;
-
     const loadInitialTasks = async () => {
       try {
         const initialTasks = await fetchTasks();
@@ -34,17 +32,13 @@ export const Home = () => {
     loadInitialTasks();
 
     const cleanup = connectWebSocket(
-      API_URL,
+      import.meta.env.VITE_API_URL,
       (updatedTask) => {
         setTasks((prev) => {
           const exists = prev.some((t) => t._id === updatedTask._id);
-          if (exists) {
-            return prev.map((t) =>
-              t._id === updatedTask._id ? updatedTask : t
-            );
-          } else {
-            return [...prev, updatedTask];
-          }
+          return exists
+            ? prev.map((t) => (t._id === updatedTask._id ? updatedTask : t))
+            : [...prev, updatedTask];
         });
       },
       (_id) => {
@@ -55,6 +49,18 @@ export const Home = () => {
     return cleanup;
   }, [setTasks]);
 
+  useEffect(() => {
+    try {
+      const storedUser = Cookies.get("userInfo");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUsername(parsedUser.username || parsedUser);
+      }
+    } catch (error) {
+      console.error("Error parsing user info:", error);
+    }
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -64,21 +70,48 @@ export const Home = () => {
     }
   };
 
- 
-
   if (loading) {
     return <Box sx={{ p: 2 }}>Loading tasks...</Box>;
   }
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Button variant="contained" color="secondary" onClick={handleLogout}>
-              Logout
-            </Button>
-          </Box>
-     
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Avatar sx={{ bgcolor: "primary.main" }}>
+            <PersonIcon />
+          </Avatar>
+          <Chip
+            label={username}
+            color="primary"
+            variant="outlined"
+            sx={{
+              fontSize: "1rem",
+              px: 2,
+              py: 1,
+              borderRadius: 1,
+              borderColor: "primary.main",
+              backgroundColor: "background.paper",
+            }}
+          />
+        </Box>
+
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleLogout}
+          sx={{ ml: "auto" }}
+        >
+          Logout
+        </Button>
       </Box>
 
       <AddTask />
@@ -89,5 +122,3 @@ export const Home = () => {
     </Box>
   );
 };
-
-export default Home;

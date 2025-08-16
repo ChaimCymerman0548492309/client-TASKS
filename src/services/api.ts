@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import type { Task } from "../types/task";
 import Cookies from "js-cookie";
@@ -44,16 +45,24 @@ export const deleteTask = async (id: string): Promise<void> => {
 export const login = async (credentials: {
   email: string;
   password: string;
-}): Promise<void> => {
-  const { data } = await api.post("/auth/login", credentials);
-  console.log("🚀 Login response:", data);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): Promise<{ userInfo: any }> => {
+  try {
+    const response = await api.post("/auth/login", credentials);
 
-  // שומרים רק userInfo לקריאה בצד הקליינט (לא את הטוקן!)
-  if (data.userInfo) {
-    Cookies.set("userInfo", JSON.stringify(data.userInfo), {
-      secure: true,
-      sameSite: "strict",
-    });
+    if (response.data.userInfo) {
+      Cookies.set("userInfo", JSON.stringify(response.data.userInfo.username), {
+        secure: true,
+        sameSite: "strict",
+      });
+    }
+
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error; // Propagate server error as-is
+    }
+    throw new Error("Network error. Please check your connection");
   }
 };
 
@@ -62,7 +71,19 @@ export const register = async (userData: {
   email: string;
   password: string;
 }): Promise<void> => {
-  await api.post("/auth/register", userData);
+  try {
+    const response = await api.post("/auth/register", userData);
+    if (response.status !== 201) {
+      throw new Error(response.data?.error || "Registration failed");
+    }
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(
+        error.response.data?.error || error.response.data?.message
+      );
+    }
+    throw new Error("Network error. Please try again");
+  }
 };
 
 export const logout = async (): Promise<void> => {
