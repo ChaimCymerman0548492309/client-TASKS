@@ -1,7 +1,8 @@
-import io, { Socket } from "socket.io-client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import io from "socket.io-client";
 import type { Task } from "../types/task";
 
-let socket: Socket | null = null;
+let socket: any | null = null;
 
 export const connectWebSocket = (
   url: string,
@@ -15,14 +16,15 @@ export const connectWebSocket = (
     path: "/api/socket.io",
     transports: ["websocket"],
     autoConnect: true,
-    withCredentials: true,
+    // withCredentials: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
   });
 
   socket.on("connect", () => console.log("Socket.IO connected"));
   socket.on("disconnect", () => console.log("Socket.IO disconnected"));
-  socket.on("connect_error", (err) => console.error("Socket.IO error:", err));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  socket.on("connect_error", (err : any) => console.error("Socket.IO error:", err));
 
   socket.on("task_created", (task: Task) => onUpdate(task));
   socket.on("task_updated", (task: Task) => onUpdate(task));
