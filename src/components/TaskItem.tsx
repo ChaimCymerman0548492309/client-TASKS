@@ -29,8 +29,6 @@ export const TaskItem = ({ task }: { task: Task }) => {
   }, [isEditing]);
 
   const handleUpdate = async (updates: Partial<Task>) => {
-    console.log(`Updating task: ${task._id} with`, updates);
-    
     try {
       const updatedTask = await updateTask(task._id, updates);
       setTasks((prev) =>
@@ -38,15 +36,13 @@ export const TaskItem = ({ task }: { task: Task }) => {
       );
       enqueueSnackbar("Task updated", { variant: "success" });
       return true;
-    } catch  {
+    } catch {
       enqueueSnackbar("Update failed", { variant: "error" });
       return false;
     }
   };
 
   const handleDelete = async () => {
-    console.log(`Deleting task: ${task._id}`);
-    
     try {
       await deleteTask(task._id);
       setTasks((prev) => prev.filter((t) => t._id !== task._id));
@@ -61,26 +57,21 @@ export const TaskItem = ({ task }: { task: Task }) => {
   };
 
   const handleEditSave = async () => {
-
     if (!editedTitle.trim()) {
       enqueueSnackbar("Title cannot be empty", { variant: "warning" });
       return;
     }
-
     const success = await handleUpdate({ title: editedTitle });
     if (success) setIsEditing(false);
   };
 
   return (
     <ListItem sx={{ borderBottom: "1px solid #eee", alignItems: "flex-start" }}>
-      {/* Checkbox for completed */}
       <Checkbox
         checked={task.completed}
         onChange={handleToggleComplete}
         color="primary"
       />
-
-      {/* Task details */}
       <Box sx={{ flexGrow: 1 }}>
         {isEditing ? (
           <TextField
@@ -102,15 +93,11 @@ export const TaskItem = ({ task }: { task: Task }) => {
             {task.title}
           </Typography>
         )}
-
-        {/* Metadata: created by + date */}
         <Typography variant="caption" color="text.secondary">
-          נוצר ע"י {task.createdBy || "לא ידוע"} •{" "}
-          {new Date(task.createdAt).toLocaleString("he-IL")}
+          Created by {task.createdBy || "Unknown"} •{" "}
+          {new Date(task.createdAt).toLocaleString("en-US")}
         </Typography>
       </Box>
-
-      {/* Actions */}
       <Stack direction="row" spacing={1}>
         {isEditing ? (
           <>
